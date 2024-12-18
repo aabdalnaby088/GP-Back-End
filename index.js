@@ -12,8 +12,11 @@ app.use(cors());
 app.use(express.json());
 
 bootstrap(app)
+app.use('*', (req, res, next) => {
+    next(new AppError(`route not found ${req.originalUrl}`, 404))
+})
 app.use(globalResponse)
 
 db_connection()
-app.get('/', (req, res) => res.json({'message':'Hello World!'}))
+
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
