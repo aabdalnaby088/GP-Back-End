@@ -15,5 +15,5 @@ bootstrap(app)
 app.use(globalResponse)
 
 db_connection()
-app.get('/', (req, res) => res.send('Hello World!'))
+app.get('/', (req, res) => res.json({'message':'Hello World!'}))
 app.listen(port, () => console.log(`Example app listening on port ${port}!`))
