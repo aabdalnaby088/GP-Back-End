@@ -4,6 +4,7 @@ import db_connection from './db/dbConnection.js'
 import { globalResponse } from './src/middlewares/handleError.middleware.js'
 import  bootstrap  from "./src/modules/bootstrap.js"
 import cors from 'cors'
+import { ErrorHandlerClass } from './src/utils/Error-class.utils.js'
 
 
 const app = express()
@@ -13,7 +14,7 @@ app.use(express.json());
 
 bootstrap(app)
 app.use('*', (req, res, next) => {
-    next(new AppError(`route not found ${req.originalUrl}`, 404))
+    next(new ErrorHandlerClass(`route not found ${req.originalUrl}`, 404))
 })
 app.use(globalResponse)
 
