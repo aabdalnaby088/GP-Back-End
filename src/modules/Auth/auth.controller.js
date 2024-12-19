@@ -1,10 +1,9 @@
-import { User } from "../../../db/models/index.js";
+import { OTP, User } from "../../../db/models/index.js";
 import { sendEmailService } from "../../services/sendingEmail.service.js";
 import { ErrorHandlerClass } from "../../utils/Error-class.utils.js";
 import { compare, hashSync } from "bcrypt";
 import jwt from 'jsonwebtoken'
-
-
+import  otpGenerator from 'otp-generator'
 export const signUp = async (req, res, next) => {
     
     const { fullName,email, password, age } = req.body;
@@ -73,3 +72,59 @@ export const verifyEmail = async (req, res, next) => {
     res.status(200).json({ message: "Email verified successfully" });
 }
 
+
+export const sendOTP = async (req, res, next) => {
+    const {email} = req.body;
+    
+    const user = await User.findOne({email})
+    if(!user){
+        return next(new ErrorHandlerClass("user not found", 404));
+    }
+    const otp = otpGenerator.generate(4,{
+        lowerCaseAlphabets: false,
+        upperCaseAlphabets: false,
+        specialChars: false,
+    })
+    const newOtp = new OTP({
+        email: user.email,
+        otp
+    })
+    
+    const isEmailSent = await sendEmailService({
+        to: user.email,
+        subject: "KimitKids - reset password",
+        htmlMessage: `<p>Your OTP is: <strong>${otp}</strong> OTP expires in 10 mins</p>`
+    })
+    if(isEmailSent?.rejected?.length> 0){
+        next(new ErrorHandlerClass("error in sending email", 400));
+    }
+    await newOtp.save();
+    res.status(200).json({ message: "OTP sent successfully" });
+}
+
+export const verifyOTP = async (req, res, next) => {
+    const {otp} = req.body;
+    const otpObj = await OTP.findOne({otp}) ;
+    if(!otpObj){
+        return next(new ErrorHandlerClass("invalid otp", 400));
+    }
+    const user = await User.findOne({email: otpObj.email})
+    if(!user){
+        return next(new ErrorHandlerClass("user not found", 404));
+    }
+    await OTP.findByIdAndDelete(otpObj._id); 
+    res.status(200).json({ message: "OTP verified successfully" });
+}
+
+export const resetPassword = async (req, res, next) => {
+    const {email, password} = req.body;
+    const user = await User.findOne({email})
+    if(!user){
+        return next(new ErrorHandlerClass("user not found", 404));
+    }
+    const hashedPassword = hashSync(password, Number(process.env.SALT_ROUNDS));
+
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({ message: "password reset successfully" });
+}

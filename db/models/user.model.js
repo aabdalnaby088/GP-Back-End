@@ -31,6 +31,10 @@ const userSchema = new Schema({
     isEmailVerified:{
         type:Boolean,
         default:false
+    },
+    otp:{
+        type:String,
+        default:null
     }
 }, { timestamps: true  })
 
