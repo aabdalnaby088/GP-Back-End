@@ -44,11 +44,11 @@ export const multerHost = () => {
 
     const fileFilter = (req, file, cb) => {
         // accept .pdf files only 
-        return cb(null, true);
-        // if (file.mimetype === "application/pdf") {
-        //     return cb(null, true);
-        // }
-        // return cb(new ErrorHandlerClass("Error in file extension pdf only is allowed", 400));
+        // return cb(null, true);
+        if (file.mimetype == "application/pdf") {
+            return cb(null, true);
+        }
+        return cb(new ErrorHandlerClass("Error in file extension pdf only is allowed", 400));
     }
 
     return multer({ fileFilter, storage })
