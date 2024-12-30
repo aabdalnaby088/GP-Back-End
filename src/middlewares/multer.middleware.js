@@ -45,6 +45,8 @@ export const multerHost = () => {
     const fileFilter = (req, file, cb) => {
         // accept .pdf files only 
         // return cb(null, true);
+        console.log(file.mimetype);
+        
         if (file.mimetype == "application/pdf") {
             return cb(null, true);
         }
