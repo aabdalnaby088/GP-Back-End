@@ -12,6 +12,7 @@ export const uploadDataFiles = async (req, res, next) =>{
     }
     const data = []; 
     for (const file of req.files) {
+        
         const { secure_url, original_filename } = await cloudinaryConfig().uploader.upload(file.path, {
             folder: "gp/data",
             use_filename: true,
