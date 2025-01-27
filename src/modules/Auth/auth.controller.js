@@ -50,7 +50,7 @@ export const signIn = async (req,res,next) => {
         return next(new ErrorHandlerClass("incorrect credentials", 404));
     }
 
-    const token = jwt.sign({userId: user._id, email: user.email, fullName: user.fullName}, "loginTokenSignature")
+    const token = jwt.sign({userId: user._id, fullName: user.fullName, age: user.age}, "loggedUser")
 
 
     res.status(200).json({ message: "User logged in successfully", token});
@@ -127,4 +127,47 @@ export const resetPassword = async (req, res, next) => {
     user.password = hashedPassword;
     await user.save();
     res.status(200).json({ message: "password reset successfully" });
+}
+
+export const updateLoggedUserData = async (req, res, next) => {
+    const { _id:userId } = req.user; 
+    const user = await User.findById(userId);
+    if(!user){
+        return next(new ErrorHandlerClass("user not found", 404));
+    }
+    if (req.body.fullName){
+        user.fullName = req.body.fullName;
+    }
+    if(req.body.age){
+        user.age = req.body.age;
+    }
+    const token = jwt.sign({ userId: user._id, fullName: user.fullName, age: user.age }, "loggedUser")
+    await user.save(); 
+    res.status(200).json({ message: "user updated successfully" , token});
+}
+
+export const updateLoggedUserPasswords = async (req, res, next) => {
+    const { _id:userId } = req.user;
+    const {currentPassword, newPassword} = req.body;
+    const user = await User.findById(userId);
+    if (!user) {
+        return next(new ErrorHandlerClass("user not found", 404));
+    }
+    const checkCurrentPassword = await compare(currentPassword, user.password);
+    if(!checkCurrentPassword){
+        return next(new ErrorHandlerClass("invalid current password", 400));
+    }
+    const hashedPassword = hashSync(newPassword, Number(process.env.SALT_ROUNDS));
+    user.password = hashedPassword;
+    await user.save();
+    res.status(200).json({ message: "password updated successfully" });
+}
+
+export const deleteAccount = async (req, res, next) => {
+    const { _id:userId } = req.user;
+    const user = await User.findByIdAndDelete(userId);
+    if (!user) {
+        return next(new ErrorHandlerClass("user not found", 404));
+    }
+    res.status(200).json({ message: "account deleted successfully" });
 }
