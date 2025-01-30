@@ -50,7 +50,7 @@ export const signIn = async (req,res,next) => {
         return next(new ErrorHandlerClass("incorrect credentials", 404));
     }
 
-    const token = jwt.sign({userId: user._id, fullName: user.fullName, age: user.age}, "loggedUser")
+    const token = jwt.sign({userId: user._id, fullName: user.fullName, age: user.age, email:user.email}, "loggedUser")
 
 
     res.status(200).json({ message: "User logged in successfully", token});
@@ -141,7 +141,7 @@ export const updateLoggedUserData = async (req, res, next) => {
     if(req.body.age){
         user.age = req.body.age;
     }
-    const token = jwt.sign({ userId: user._id, fullName: user.fullName, age: user.age }, "loggedUser")
+    const token = jwt.sign({ userId: user._id, fullName: user.fullName, age: user.age, email: user.email }, "loggedUser")
     await user.save(); 
     res.status(200).json({ message: "user updated successfully" , token});
 }
@@ -164,10 +164,18 @@ export const updateLoggedUserPasswords = async (req, res, next) => {
 }
 
 export const deleteAccount = async (req, res, next) => {
+    const {password} = req.body
     const { _id:userId } = req.user;
-    const user = await User.findByIdAndDelete(userId);
+    const user = await User.findById(userId); 
     if (!user) {
         return next(new ErrorHandlerClass("user not found", 404));
     }
+    const checkPassword = await compare(password, user.password);
+    if(!checkPassword){
+        return next(new ErrorHandlerClass("invalid password", 400));
+    }
+    await User.findByIdAndDelete(userId);
+
+
     res.status(200).json({ message: "account deleted successfully" });
 }
