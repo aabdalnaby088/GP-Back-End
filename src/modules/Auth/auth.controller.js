@@ -112,7 +112,7 @@ export const verifyOTP = async (req, res, next) => {
     if(!user){
         return next(new ErrorHandlerClass("user not found", 404));
     }
-    await OTP.findByIdAndDelete(otpObj._id); 
+    await OTP.findByIdAndDelete(otpObj._id);
     res.status(200).json({ message: "OTP verified successfully" });
 }
 

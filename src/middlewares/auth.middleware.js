@@ -5,11 +5,11 @@ import { User } from '../../db/models/user.model.js';
 export const auth =  () => {
 
     return async (req, res, next) => {
-        const { token } = req.headers; 
+        const { token } = req.headers;
         if(!token) {
-            return next(new ErrorHandlerClass("Error in authentication", 404, "Token not found")); 
+            return next(new ErrorHandlerClass("Error in authentication", 404, "Token not found"));
         }
-        const decodedData = jwt.verify(token, "loggedUser"); 
+        const decodedData = jwt.verify(token, "loggedUser");
         if(!decodedData?.userId){
             return next(new ErrorHandlerClass("Error in authentication", 404, "Invalid token"));
         }
@@ -21,4 +21,4 @@ export const auth =  () => {
         
         next();
     }
-} 
+}

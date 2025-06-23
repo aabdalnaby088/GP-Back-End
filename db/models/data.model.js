@@ -8,7 +8,11 @@ const dataSchema = new Schema({
     name:{
         type:String,
         required:true
-    }
+    },
+    processed:{
+        type:Boolean,
+        default:false
+    },
 
 }, {timestamps: true})
 
