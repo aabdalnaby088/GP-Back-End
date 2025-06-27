@@ -1,3 +1,4 @@
+import axios from "axios";
 import { Data } from "../../../db/models/data.model.js";
 import { cloudinaryConfig } from "../../utils/cloudinary.utils.js"
 import { ErrorHandlerClass } from "../../utils/Error-class.utils.js";
@@ -27,6 +28,11 @@ export const uploadDataFiles = async (req, res, next) =>{
             return next(new ErrorHandlerClass("data file can  not be uploaded", original_filename ))
         }
     }
+
+    await axios.get("https://clustering-model-fastapi-392375271750.us-central1.run.app/cluster")
+    await axios.post("https://story-model-907548739446.us-central1.run.app/process_pdfs")
+    await axios.post("https://story-model-907548739446.us-central1.run.app/generate-stories")
+
 
 
     res.json({"message": "data files uploaded sussefully", data})
